@@ -60,12 +60,34 @@ Terminal B — run these to trigger log activity
 # Shows SUCCESSFUL logins — useful to compare with failed ones
 
 
+## awk pipeline — extract and count IPs
 
+grep 'Failed password' /var/log/auth.log \
+| awk '{print $11}' \
+| sort \
+| uniq -c \
+| sort -rn
+# The \ at end of each line lets you split one command across lines
+# OR paste all on one line without the backslashes
 
+- grep 'Failed...'
+Step 1: Filter only the failed login lines from auth.log. This is the raw data source.
+| awk '{print $11}'
+Step 2: From each line, print only field 11 — the IP address. You get a list of IPs, one per line, with duplicates.
+| sort
+Step 3: Alphabetically sort the IP list. This groups identical IPs together so the next command can count them.
+| uniq -c
+Step 4: Collapse consecutive identical lines into one, and prefix each with a count. 192.168.1.1 appearing 47 times becomes: '47 192.168.1.1'
+| sort -rn
+Step 5: Sort the counted results numerically (-n) in reverse (-r). Highest count appears first — your top attacker is at the top.
 
-
-
-
-
+* --------------------------------------------
+grep 'Failed password' /var/log/auth.log \
+| awk '{print $11}' \
+| sort \
+| uniq -c \
+| sort -rn
+      3 ::1
+---------------------------------------------- * 
 
 
