@@ -23,4 +23,18 @@ grep -c 'error' /var/log/syslog
 ## tail -f -- watching logs in real time 
 ## commands :-
 
+Terminal A — paste this and leave it running
+- tail -f /var/log/syslog
+# This command does NOT return to a prompt. It stays running.
+# You'll see the last 10 lines, then it waits for new entries.
+# Leave Terminal A alone. Switch to Terminal B now.
 
+Terminal B — run these to trigger log activity
+- sudo apt update
+# apt (package manager) logs heavily to syslog — watch Terminal A
+- ping -c 3 8.8.8.8
+# 3 ICMP pings to Google's DNS — generates network log entries
+- sudo systemctl restart ssh
+# Restarting SSH service generates entries in both syslog and auth.log
+- ls /etc/
+# Even simple commands can show in logs via auditd if enabled
