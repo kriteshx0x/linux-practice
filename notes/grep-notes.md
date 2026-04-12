@@ -2,92 +2,89 @@
 - sudo apt install rsyslog
 this command installs the file in /var/log/syslog.
 
-## grep - the log seach engine.
-## commands :- 
+# grep cheatsheet — Day 5
 
-grep -i 'error' /var/log/syslog
-# -i = case insensitive. Finds Error, ERROR, error, eRrOr — all of them.
+## What is grep?
+grep (Global Regular Expression Print) searches text files line by line
+and prints every line that matches a pattern.
 
-grep -n 'error' /var/log/syslog
-# -n = line numbers. Output: 1042: Nov 12 10:01:03 ... error ...
-# The number before the colon is the line number in the file
+---
 
+## Core flags
+
+| Flag | What it does | Example |
+|------|-------------|---------|
+| `-i` | Case-insensitive search | `grep -i 'error' syslog` |
+| `-n` | Show line numbers | `grep -n 'error' syslog` |
+| `-r` | Recursive (search all files in a dir) | `grep -r 'error' /var/log/` |
+| `-c` | Count matching lines only | `grep -c 'error' syslog` |
+| `-v` | Invert — show lines that do NOT match | `grep -v 'info' syslog` |
+| `-A N` | Show N lines AFTER each match | `grep -A 3 'error' syslog` |
+| `-B N` | Show N lines BEFORE each match | `grep -B 2 'error' syslog` |
+| `-E` | Extended regex (use OR, +, ?, etc.) | `grep -E 'err|warn' syslog` |
+| `-l` | List filenames that contain the match | `grep -l 'error' /var/log/*.log` |
+| `-w` | Match whole words only | `grep -w 'fail' syslog` |
+
+---
+
+## Cybersecurity-specific commands
+
+```bash
+# Find all failed SSH login attempts
+grep 'Failed password' /var/log/auth.log
+
+# Count total failed attempts
+grep -c 'Failed password' /var/log/auth.log
+
+# Find successful logins (what got through?)
+grep 'Accepted password' /var/log/auth.log
+
+# Find errors in all logs at once
 grep -r 'error' /var/log/
-# -r = recursive. Searches EVERY file inside /var/log/
-# Output shows filename:line content — e.g. /var/log/syslog: Nov 12 error...
 
-grep -c 'error' /var/log/syslog
-# -c = count only. Returns a single number like: 247
-# Translation: 247 lines in syslog contain the word 'error'
+# Case-insensitive error search with line numbers
+grep -in 'error' /var/log/syslog
 
-## tail -f -- watching logs in real time 
-## commands :-
+# Show 3 lines before + after each match (full context)
+grep -B 3 -A 3 'Failed password' /var/log/auth.log
 
-Terminal A — paste this and leave it running
-- tail -f /var/log/syslog
-# This command does NOT return to a prompt. It stays running.
-# You'll see the last 10 lines, then it waits for new entries.
-# Leave Terminal A alone. Switch to Terminal B now.
+# Search for two patterns at once (regex OR)
+grep -E 'error|critical|warning' /var/log/syslog
+```
 
-Terminal B — run these to trigger log activity
-- sudo apt update
-# apt (package manager) logs heavily to syslog — watch Terminal A
-- ping -c 3 8.8.8.8
-# 3 ICMP pings to Google's DNS — generates network log entries
-- sudo systemctl restart ssh
-# Restarting SSH service generates entries in both syslog and auth.log
-- ls /etc/
-# Even simple commands can show in logs via auditd if enabled
+---
 
-## find failed ssh login :-
+## The IP extraction pipeline (threat hunting)
 
-* 1st i created some fake login and failed ssh attempts .
-* i used this all commands in my terminal and also finds some interesting logs and it was also thilling .
- 
-- grep 'Failed password' /var/log/auth.log
-# No -i flag — 'Failed password' is EXACTLY how Linux writes it
-
-- grep -c 'Failed password' /var/log/auth.log
-# Total count of failed attempts — one number like: 47
-
-- grep 'Failed password' /var/log/auth.log | tail -20
-# pipe to tail: shows only the 20 most RECENT failed attempts
-
-- grep 'Failed password' /var/log/auth.log | wc -l
-# wc -l = word count, lines mode. Same result as grep -c
-
-- grep 'Accepted password' /var/log/auth.log
-# Shows SUCCESSFUL logins — useful to compare with failed ones
-
-
-## awk pipeline — extract and count IPs
-
+```bash
 grep 'Failed password' /var/log/auth.log \
-| awk '{print $11}' \
-| sort \
-| uniq -c \
-| sort -rn
-# The \ at end of each line lets you split one command across lines
-# OR paste all on one line without the backslashes
+  | awk '{print $11}' \
+  | sort \
+  | uniq -c \
+  | sort -rn
+```
 
-- grep 'Failed...'
-Step 1: Filter only the failed login lines from auth.log. This is the raw data source.
-| awk '{print $11}'
-Step 2: From each line, print only field 11 — the IP address. You get a list of IPs, one per line, with duplicates.
-| sort
-Step 3: Alphabetically sort the IP list. This groups identical IPs together so the next command can count them.
-| uniq -c
-Step 4: Collapse consecutive identical lines into one, and prefix each with a count. 192.168.1.1 appearing 47 times becomes: '47 192.168.1.1'
-| sort -rn
-Step 5: Sort the counted results numerically (-n) in reverse (-r). Highest count appears first — your top attacker is at the top.
+**What each pipe does:**
+- `grep` → filter only failed login lines
+- `awk '{print $11}'` → extract field 11 (the IP address)
+- `sort` → group identical IPs together
+- `uniq -c` → count each unique IP
+- `sort -rn` → sort numerically, highest count first
 
-* --------------------------------------------
-grep 'Failed password' /var/log/auth.log \
-| awk '{print $11}' \
-| sort \
-| uniq -c \
-| sort -rn
-      3 ::1
----------------------------------------------- * 
+---
 
+## Quality-of-life tip
+Add this to ~/.bashrc to get coloured grep output automatically:
+```bash
+alias grep='grep --color=auto'
+```
+
+---
+
+## Log file anatomy
+```
+Nov 12 10:01:44   kali   sshd[1293]:  Failed password for root from 192.168.1.105 port 52342
+$timestamp        $host  $process     $message
+```
+Fields in awk: $1=Nov $2=12 $3=time $4=host $5=process $6-$10=message $11=IP
 
