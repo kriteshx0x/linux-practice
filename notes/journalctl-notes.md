@@ -47,3 +47,7 @@ Attack attempts (SSH failures)
 System behavior
 Debugging info
 
+## small challenges 
+1.Filter logs to show ONLY failed SSH login attempts from the last 24 hours.
+-> journalctl -u ssh --since "2 days ago" | grep "Failed"
+
