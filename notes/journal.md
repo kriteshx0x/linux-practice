@@ -66,3 +66,30 @@ alias
 source ~/.zshrc
 echo $PS1
 
+
+# Day 7 notes : log_analysis_scripts.sh
+
+## what I learned
+- auth.log stores SSH login attempts (failed + successful)
+- grep filters logs, awk extracts IP using $(NF-3)
+- sort + uniq -c counts occurrences
+- head -5 used to get top attackers
+- Scripts need execute permission (chmod +x)
+- Relative paths (../../) depend on current directory
+
+## needs more practice
+- Understanding awk fields deeply (NF logic)
+- Writing dynamic scripts (arguments like ${1:-default})
+- Debugging pipelines step-by-step
+- Handling different log formats
+
+## key commands
+grep "Failed password" auth.log
+awk '{print $(NF-3)}'
+sort | uniq -c | sort -rn
+chmod +x *.sh
+ls ../../samples/auth.log
+./failed_logins.sh ../../samples/auth.log
+./top_ips.sh ../../samples/auth.log
+
+
