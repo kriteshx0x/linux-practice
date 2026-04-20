@@ -2,7 +2,7 @@
 
 echo "[+] Linking configuration files..."
 
-BASE_DIR=$(pwd)
+BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
 ln -sf $BASE_DIR/bash/.bashrc ~/.bashrc
 ln -sf $BASE_DIR/zsh/.zshrc ~/.zshrc

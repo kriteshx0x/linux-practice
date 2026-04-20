@@ -1,8 +1,15 @@
+# Base directory of this repo (resolved dynamically)
+BASE_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Load aliases
-source ~/linux-config/zsh/aliases.zsh
+[ -f "$BASE_DIR/aliases.zsh" ] && source "$BASE_DIR/aliases.zsh"
 
-# Load prompt config if exists
-[ -f ~/linux-config/zsh/ps1-config.sh ] && source ~/linux-config/zsh/ps1-config.sh
+# Load prompt config
+[ -f "$BASE_DIR/ps1-config.sh" ] && source "$BASE_DIR/ps1-config.sh"
 
+# Default editor
 export EDITOR=vim
+
+# Quality of life
+setopt autocd
 
