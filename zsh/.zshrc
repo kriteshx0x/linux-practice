@@ -13,3 +13,11 @@ export EDITOR=vim
 # Quality of life
 setopt autocd
 
+# Load aliases
+[ -f ~/repos/linux-config/zsh/aliases.zsh ] && source ~/repos/linux-config/zsh/aliases.zsh
+
+# Load prompt
+[ -f ~/repos/linux-config/zsh/ps1-config.sh ] && source ~/repos/linux-config/zsh/ps1-config.sh
+
+export EDITOR=vim
+

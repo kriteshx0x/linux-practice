@@ -9,6 +9,7 @@ sudo apt install -y \
     curl \
     vim \
     zsh \
+    kitty \
     htop \
     tree
 
