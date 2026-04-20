@@ -1,2 +1,15 @@
-# linux-practice
-Personal Linux config files, aliases, scripts, and sysadmin notes for Kali Linux
+# Linux Config Setup
+
+Automated Linux developer environment setup.
+
+## Features
+- One-command installation
+- Zsh, Vim, Git configuration
+- Custom aliases
+- Tool installation
+
+## Usage
+
+```bash
+bash setup.sh
+
