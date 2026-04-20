@@ -1,20 +1,34 @@
-#!/bin/bash
+#!/usr/bin/env bash
+# =============================================================================
+# setup_symlinks.sh — creates all dotfile symlinks
+# =============================================================================
 
-echo "[+] Linking configuration files..."
+set -euo pipefail
+source "$(dirname "$0")/utils.sh"
 
-BASE_DIR="$(cd "$(dirname "$0")/.." && pwd)"
+DOTFILES_DIR="$(cd "$(dirname "$0")/.." && pwd)"
 
-# Core configs
-ln -sf "$BASE_DIR/bash/.bashrc" ~/.bashrc
-ln -sf "$BASE_DIR/git/.gitconfig" ~/.gitconfig
-ln -sf "$BASE_DIR/vim/.vimrc" ~/.vimrc
+info "Creating symlinks..."
 
-# Zsh (only if exists)
-[ -f "$BASE_DIR/zsh/.zshrc" ] && ln -sf "$BASE_DIR/zsh/.zshrc" ~/.zshrc
+# zsh
+link_file "$DOTFILES_DIR/zsh/.zshrc"          "$HOME/.zshrc"
+link_file "$DOTFILES_DIR/zsh/aliases.zsh"     "$HOME/.zsh_aliases"
+link_file "$DOTFILES_DIR/zsh/functions.zsh"   "$HOME/.zsh_functions"
 
-# Kitty config
-mkdir -p ~/.config/kitty
-ln -sf "$BASE_DIR/kitty/kitty.conf" ~/.config/kitty/kitty.conf
+# git
+link_file "$DOTFILES_DIR/git/gitconfig"       "$HOME/.gitconfig"
+link_file "$DOTFILES_DIR/git/gitignore"       "$HOME/.gitignore_global"
 
-echo "[✓] Symlinks created"
+# kitty
+mkdir -p "$HOME/.config/kitty"
+link_file "$DOTFILES_DIR/kitty/kitty.conf"    "$HOME/.config/kitty/kitty.conf"
+link_file "$DOTFILES_DIR/kitty/theme.conf"    "$HOME/.config/kitty/theme.conf"
 
+# tmux
+link_file "$DOTFILES_DIR/tmux/tmux.conf"      "$HOME/.tmux.conf"
+
+# fastfetch
+mkdir -p "$HOME/.config/fastfetch"
+link_file "$DOTFILES_DIR/fastfetch/config.jsonc" "$HOME/.config/fastfetch/config.jsonc"
+
+success "All symlinks created."
